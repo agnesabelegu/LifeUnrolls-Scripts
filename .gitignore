@@ -45,3 +45,6 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+*.meta
+FauxGravityAttractor.cs~RF2e6b3d21.TMP
+*.TMP
