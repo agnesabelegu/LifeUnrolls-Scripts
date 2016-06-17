@@ -61,29 +61,36 @@ public class AIObstacle : MonoBehaviour
         currentPlayerPos = playerObject.transform.position;
 
         //If the enemy type is a chasing obstacle
-        //TODO - similar to charging obstacle
         if (EnemyType == EnemyTypes.ChasingObstacle)
         {
             ActivateChasingObstacleLogic();
         }
+        //If the enemy type is a charging obstacle
         else if (EnemyType == EnemyTypes.ChargingObstacle)
         {
             ActivateChargingObstacleLogic();
         }
+        //If the enemy type is a ambushing obstacle
         else if (EnemyType == EnemyTypes.AmbushingObstacle)
         {
             ActivateAmbushingObstacleLogic();
         }
-
+        
+        //Stop the enemy if they are supposed to hold their position.
         if (CurrentEnemyState == EnemyStates.HoldingPosition)
         {
             myRigidBody.velocity = Vector3.zero;
         }
 
+        //Keep track of the player state
         isPlayerCaptured = playerObject.GetComponent<PlayerController>().LostControl;
         isPlayerInfected = playerObject.GetComponent<PlayerController>().Infected;
     }
 
+    //Charging Enemy follows the player until they are within range
+    //If within range, this enemy type will charge towards the player with an increased speed
+    //If the player is hit, they are "captured", in which case the player loses control and
+    //the enemy takes them to the enemy base.
     void ActivateChargingObstacleLogic()
     {
         if (CurrentEnemyState == EnemyStates.Following)
@@ -99,7 +106,8 @@ public class AIObstacle : MonoBehaviour
             CarryPlayerToPrison();
         }
     }
-
+    //Chasing Enemy follows the player until they are within range
+    //If they catch up with the player, the player is "captured" and taken to the enemy base.
     void ActivateChasingObstacleLogic()
     {
         if (CurrentEnemyState == EnemyStates.Following)
@@ -111,7 +119,10 @@ public class AIObstacle : MonoBehaviour
             CarryPlayerToPrison();
         }
     }
-
+    
+    //This enemy type does not move until the player enters within their range of vision.
+    //When the player is within their range, this enemy charges towards them. 
+    //If hit, they "capture" the player and attempt to take them at the enemy base.
     void ActivateAmbushingObstacleLogic()
     {
         if (CurrentEnemyState == EnemyStates.Charging)
@@ -130,12 +141,12 @@ public class AIObstacle : MonoBehaviour
         transform.position = Vector3.MoveTowards(transform.position, currentPlayerPos, MoveSpeed * Time.deltaTime);
     }
 
-    //Carrying the player to FailGame location
+    //Carrying the player to Enemy Base location
     void CarryPlayerToPrison()
     {
         chargeTimer = 0;
+        
         //Catch the player if reached
-
         if (playerObject.GetComponent<PlayerController>().LostControl == true)
         {
             transform.position = Vector3.MoveTowards(transform.position, EnemyTarget.transform.position, MoveSpeed * Time.deltaTime);
@@ -186,6 +197,7 @@ public class AIObstacle : MonoBehaviour
         }
     }
 
+    //When player is within range, react properly depending on the enemy type
     void OnCollisionEnter(Collision other)
     {
         if (other.gameObject.tag == "Player")
@@ -209,6 +221,8 @@ public class AIObstacle : MonoBehaviour
         }
     }
 
+    //When player is within range, react properly depending on the enemy type
+    //This detects if the player has entered this enemy's maximum range.
     void OnTriggerEnter(Collider other)
     {
         if (other.gameObject.tag == "Player" && ((EnemyType == EnemyTypes.ChargingObstacle || (EnemyType == EnemyTypes.AmbushingObstacle && !isPlayerInfected) && !isPlayerCaptured)))
