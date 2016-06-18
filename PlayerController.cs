@@ -13,12 +13,11 @@ public enum MovementMode
 public class PlayerController : MonoBehaviour
 {
     //public
-    public MovementMode CurrentMovementMode; //TODO
+    [Tooltip("Time to infection clearing up")]
+    private float TimeToClarity = 10f;
     public float MoveSpeed = 30f;
     public float RotationSpeed = 5f;
     public float MinSpeed = 0f;
-    [Tooltip("Time to infection clearing up")]
-    private float TimeToClarity = 10f;
     public float MaxSpeed = 20f;
     public float ForceMagnitude;
     public float JumpForce = 250f;
@@ -26,16 +25,14 @@ public class PlayerController : MonoBehaviour
     public GameObject InfectedOverlay;
     public int NudgesToFreedom = 10; //How many times does the player have to nudge to free themselves?
 
+    //Hidden in inspector
     [HideInInspector]
     public bool LostControl = false;
-
-    //TODO Flanking enemy logic
     [HideInInspector]
     public bool Infected = false;
 
     //Private
-
-    public int currentNudges; //How many times has the player nudged?
+    private int currentNudges; //How many times has the player nudged?
     private bool grounded; //Is the player on the ground
     private float distanceFromPlanet; //How far away is the player from the center of the planet?
     private GameObject planet;
@@ -44,27 +41,7 @@ public class PlayerController : MonoBehaviour
 
     //Controls
     private Vector3 moveDirection;
-    //private Vector3 moveDirectionTablet;
-    //private bool touchDevice; //Is the player using a tablet or keyboard?
 
-
-    //void Awake()
-    //{
-    //    //check if our current system info equals a desktop
-    //    if (SystemInfo.deviceType == DeviceType.Desktop)
-    //    {
-    //        //we are on a desktop device, so don't use touch
-    //        touchDevice = false;
-    //    }
-    //    //if it isn't a desktop, lets see if our device is a handheld device aka a mobile device
-    //    else if (SystemInfo.deviceType == DeviceType.Handheld)
-    //    {
-    //        //we are on a mobile device, so lets use touch input
-    //        touchDevice = true;
-    //    }
-    //}
-
-    // Use this for initialization
     void Start()
     {
         myRigidBody = GetComponent<Rigidbody>();
@@ -72,7 +49,6 @@ public class PlayerController : MonoBehaviour
         LostControl = false;
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (!GameManager.GameOver)
@@ -81,7 +57,6 @@ public class PlayerController : MonoBehaviour
             {
                 if (grounded)
                 {
-
                     myRigidBody.AddForce(transform.up * JumpForce);
                 }
             }
@@ -93,9 +68,10 @@ public class PlayerController : MonoBehaviour
                     myRigidBody.AddForce(transform.up * JumpForce);
                 }
             }
-
+            
+            //Check if grounded to disable double-jumping.
             grounded = false;
-            //Check if grounded
+            
             Ray ray = new Ray(transform.position, -transform.up);
             RaycastHit hit;
 
@@ -105,6 +81,7 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        //If the player is "Infected" by an ambushing obstacle, activate the overlay until the infection dissipates.
         if (Infected)
         {
             InfectedOverlay.SetActive(true);
@@ -121,6 +98,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    //Check if the player has left orbit
     private IEnumerator CheckDistanceFromPlanet()
     {
         distanceFromPlanet = Vector3.Distance(transform.position, planet.transform.position);
@@ -138,17 +116,6 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        //if (touchDevice)
-        //{
-        //   float accelerationX = Input.acceleration.x;
-        //   float accelerationY = Input.acceleration.y;
-        //   myRigidBody.MovePosition(myRigidBody.position + transform.TransformDirection(moveDirectionTablet * MoveSpeed * Time.deltaTime));
-        //}
-        //else
-        //{
-        //   float accelerationX = Input.GetAxisRaw("Horizontal");
-        //   float accelerationY = Input.GetAxisRaw("Vertical");
-        //}
         float horizontalAxis = Input.GetAxis("Horizontal") * RotationSpeed;
         transform.Rotate(0, horizontalAxis, 0);
 
@@ -156,18 +123,11 @@ public class PlayerController : MonoBehaviour
         float accelerationY = Input.GetAxisRaw("Vertical");
 
         Vector3 moveDirectionKeyboard = new Vector3(Input.GetAxisRaw("Horizontal"), 0, Input.GetAxisRaw("Vertical")).normalized;
-        //Vector3 moveDirectionTablet = new Vector3(accelerationX, 0, accelerationY).normalized;
-
+       
         //If player is still in control of ball
         if (!LostControl)
         {
-            //Allow movement inputs
-            //Move(accelerationX, accelerationY);
-
-            //Old Movement logic
             myRigidBody.MovePosition(myRigidBody.position + transform.TransformDirection(moveDirectionKeyboard * MoveSpeed * Time.deltaTime));
-            //myRigidBody.MoveRotation(Quaternion.Euler(transform.TransformDirection(moveDirectionKeyboard * RotationSpeed * Time.deltaTime)));
-           // myRigidBody.MovePosition(myRigidBody.position + transform.TransformDirection(moveDirectionTablet * MoveSpeed * Time.deltaTime));
         }
         //If player has been caught and lost control, count their nudges
         else
