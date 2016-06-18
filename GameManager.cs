@@ -18,7 +18,6 @@ public class GameManager : MonoBehaviour
     private int currentObjective;
     private float playerDistanceFromPlanet;
 
-    // Use this for initialization
     void Start()
     {
         currentObjective = 0;
@@ -36,7 +35,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
     void Update()
     {
         if (GameOver)
