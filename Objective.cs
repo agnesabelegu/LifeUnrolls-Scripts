@@ -9,9 +9,8 @@ public class Objective : MonoBehaviour
     public AudioClip ObjectiveAudio;
 
     private GameManager GameManager;
-
-	// Use this for initialization
-	void Start ()
+    
+    void Start ()
     {
         GameManager = GameObject.FindGameObjectWithTag("GameManager").GetComponent<GameManager>();
         GetComponent<AudioSource>().clip = ObjectiveAudio;
